@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Textbench: start app and MySQL",
+      "type": "shell",
+      "command": "docker compose up --build -d --wait",
+      "options": {"cwd": "${workspaceFolder}"},
+      "osx": {"command": "PATH=\"/Applications/Docker.app/Contents/Resources/bin:$PATH\" /Applications/Docker.app/Contents/Resources/bin/docker compose up --build -d --wait"},
+      "problemMatcher": []
+    },
+    {
+      "label": "Textbench: follow app logs",
+      "type": "shell",
+      "command": "docker compose logs -f app",
+      "options": {"cwd": "${workspaceFolder}"},
+      "osx": {"command": "/Applications/Docker.app/Contents/Resources/bin/docker compose logs -f app"},
+      "problemMatcher": []
+    },
+    {
+      "label": "Textbench: stop app and MySQL",
+      "type": "shell",
+      "command": "docker compose stop",
+      "options": {"cwd": "${workspaceFolder}"},
+      "osx": {"command": "/Applications/Docker.app/Contents/Resources/bin/docker compose stop"},
+      "problemMatcher": []
+    }
+  ]
+}
