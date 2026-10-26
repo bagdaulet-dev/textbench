@@ -1,0 +1,431 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A thoughtful workspace to analyze, transform, and organize your text."
+    />
+    <meta name="theme-color" content="#315be8" />
+    <title>Textbench — Make every word clearer</title>
+    <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml" />
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles.css' %}" />
+    <script src="{% static 'app.js' %}" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#text-input">Skip to editor</a>
+    <svg xmlns="http://www.w3.org/2000/svg" hidden aria-hidden="true">
+      <symbol id="i-upload" viewBox="0 0 24 24">
+        <path d="M12 16V3m-5 5 5-5 5 5M4 16v4h16v-4" />
+      </symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24">
+        <path
+          d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4L12 3Z"
+        />
+      </symbol>
+      <symbol id="i-download" viewBox="0 0 24 24">
+        <path d="M12 3v13m-5-5 5 5 5-5M4 17v4h16v-4" />
+      </symbol>
+      <symbol id="i-search" viewBox="0 0 24 24">
+        <circle cx="10.5" cy="10.5" r="6.5" />
+        <path d="m16 16 5 5" />
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24">
+        <path d="M4 12h16m-6-6 6 6-6 6" />
+      </symbol>
+      <symbol id="i-history" viewBox="0 0 24 24">
+        <path d="M4 8a9 9 0 1 1-1 8M4 3v6h6m2-3v6l4 2" />
+      </symbol>
+    </svg>
+    <header class="site-header">
+      <nav class="shell header-inner" aria-label="Main navigation">
+        <a href="/" class="brand" aria-label="Textbench home" translate="no"
+          ><span class="brand-mark" aria-hidden="true">T<span>_</span></span
+          >Textbench</a
+        >
+        <div class="nav-links">
+          <a href="#workspace">Editor</a><a href="#tools">Text tools</a
+          ><a href="#history">History</a>
+        </div>
+        {% if docs_enabled %}<a
+          class="docs-link"
+          href="/api/docs/"
+          target="_blank"
+          rel="noopener"
+          >API guide <span aria-hidden="true">↗</span></a
+        >{% endif %}
+      </nav>
+    </header>
+    <main class="shell">
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="intro-note">
+            <span aria-hidden="true"></span>A little space to think clearly
+          </p>
+          <h1 id="page-title">Make every word clearer.</h1>
+          <p class="intro-description">
+            Understand your text. Clean it up. Keep the drafts that matter.
+          </p>
+        </div>
+        <p class="intro-aside">
+          No account needed.<br />Save only when you choose.
+        </p>
+      </section>
+      <noscript
+        ><p class="alert alert-warning">
+          Enable JavaScript to use the workspace.
+        </p></noscript
+      >
+      <section id="workspace" class="workspace" aria-label="Text workspace">
+        <div class="editor-panel">
+          <div class="panel-heading">
+            <div>
+              <label for="text-input" class="section-title"
+                >Your writing desk</label
+              >
+              <p id="input-help" class="subtle">
+                Paste your text, or start with a .txt file.
+              </p>
+            </div>
+            <button class="icon-text-button" id="import-button" type="button">
+              <svg class="icon" aria-hidden="true"><use href="#i-upload" /></svg
+              >Import .txt</button
+            ><input
+              type="file"
+              id="file-input"
+              accept=".txt,text/plain"
+              hidden
+            />
+          </div>
+          <div class="editor-surface">
+            <textarea
+              id="text-input"
+              spellcheck="true"
+              placeholder="Good things start with a few words…"
+              aria-describedby="input-help input-counter input-error"
+              aria-invalid="false"
+            ></textarea>
+            <div id="input-error" class="field-error" hidden></div>
+          </div>
+          <div class="editor-meta">
+            <div class="editor-tools">
+              <button type="button" class="text-button" id="sample-button">
+                Try an example</button
+              ><button
+                type="button"
+                class="text-button"
+                id="undo-button"
+                disabled
+              >
+                Undo</button
+              ><button
+                type="button"
+                class="text-button quiet"
+                id="clear-button"
+                disabled
+              >
+                Clear
+              </button>
+            </div>
+            <span id="input-counter">0 / 20,000 characters</span>
+          </div>
+          <div class="editor-actions">
+            <div class="save-preference">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="save-analysis"
+                /><label class="form-check-label" for="save-analysis"
+                  >Save to my history</label
+                >
+              </div>
+              <span>Your text stays unsaved unless selected.</span>
+            </div>
+            <div class="analyze-action">
+              <button type="button" id="analyze-button" class="btn btn-primary">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-spark" /></svg
+                ><span id="analyze-label">Analyze text</span></button
+              ><span class="shortcut"
+                ><kbd id="shortcut-key">Ctrl</kbd> + <kbd>Enter</kbd></span
+              >
+            </div>
+          </div>
+        </div>
+        <aside
+          class="analysis-panel"
+          aria-labelledby="analysis-title"
+          aria-busy="false"
+        >
+          <div class="panel-heading">
+            <h2 id="analysis-title" class="section-title">A closer look</h2>
+            <button
+              class="text-button"
+              id="export-button"
+              type="button"
+              disabled
+            >
+              <svg class="icon" aria-hidden="true">
+                <use href="#i-download" /></svg
+              >Export
+            </button>
+          </div>
+          <p id="analysis-status" class="analysis-status">Ready when you are</p>
+          <div class="main-metrics">
+            <div>
+              <span id="word-count" class="metric-value">—</span
+              ><span class="metric-label">Words</span>
+            </div>
+            <div>
+              <span id="reading-time" class="reading-value">—</span
+              ><span class="metric-label">Reading time</span>
+            </div>
+          </div>
+          <dl class="detail-metrics">
+            <div>
+              <dt>Characters</dt>
+              <dd id="character-count">—</dd>
+            </div>
+            <div>
+              <dt>Without whitespace</dt>
+              <dd id="compact-count">—</dd>
+            </div>
+            <div>
+              <dt>Sentences</dt>
+              <dd id="sentence-count">—</dd>
+            </div>
+            <div>
+              <dt>Paragraphs</dt>
+              <dd id="paragraph-count">—</dd>
+            </div>
+            <div>
+              <dt>Unique words</dt>
+              <dd id="unique-count">—</dd>
+            </div>
+          </dl>
+          <div class="frequencies">
+            <div class="frequency-heading">
+              <h3>Words you use most</h3>
+              <span>Occurrences</span>
+            </div>
+            <p id="frequency-empty" class="subtle">
+              Analyze a draft to discover its patterns.
+            </p>
+            <ol
+              id="top-words"
+              class="word-list"
+              aria-label="Most frequent words"
+            ></ol>
+          </div>
+          <p class="method-note">
+            Reading time uses 200 words per minute. Sentence counts are
+            estimates.
+          </p>
+        </aside>
+      </section>
+      <section
+        id="tools"
+        class="transform-panel"
+        aria-labelledby="transform-title"
+      >
+        <div class="section-heading">
+          <div>
+            <h2 id="transform-title">Small changes, less effort.</h2>
+            <p>Choose a tool. Your original stays in the editor.</p>
+          </div>
+          <span class="section-hint">Five tools. One click.</span>
+        </div>
+        <div
+          class="transform-options"
+          role="group"
+          aria-label="Text transformations"
+        >
+          <button type="button" class="tool-button" data-operation="uppercase">
+            <span class="tool-glyph" aria-hidden="true">AA</span
+            ><span>Uppercase<small>Capital letters</small></span>
+          </button>
+          <button type="button" class="tool-button" data-operation="lowercase">
+            <span class="tool-glyph" aria-hidden="true">aa</span
+            ><span>Lowercase<small>Keep it quiet</small></span>
+          </button>
+          <button type="button" class="tool-button" data-operation="titlecase">
+            <span class="tool-glyph" aria-hidden="true">Aa</span
+            ><span>Title case<small>Start each word</small></span>
+          </button>
+          <button type="button" class="tool-button" data-operation="slug">
+            <span class="tool-glyph" aria-hidden="true">#</span
+            ><span>URL slug<small>Ready for a link</small></span>
+          </button>
+          <button
+            type="button"
+            class="tool-button"
+            data-operation="compact_whitespace"
+          >
+            <span class="tool-glyph" aria-hidden="true">↔</span
+            ><span>Clean spaces<small>A little tidier</small></span>
+          </button>
+        </div>
+        <div id="transform-empty" class="transform-empty">
+          <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg
+          ><span>Your transformed text will appear here.</span>
+        </div>
+        <div id="transform-output" hidden>
+          <div class="result-heading">
+            <label for="result-text" id="result-label">Result</label>
+            <div>
+              <button class="text-button" id="copy-button" type="button">
+                Copy result</button
+              ><button class="text-button" id="download-button" type="button">
+                Download .txt
+              </button>
+            </div>
+          </div>
+          <textarea
+            id="result-text"
+            readonly
+            aria-labelledby="result-label"
+            aria-describedby="result-help"
+          ></textarea>
+          <div class="result-footer">
+            <span id="result-help" class="subtle"
+              >Transformations are not saved automatically.</span
+            ><button class="text-button" id="use-result-button" type="button">
+              Use in editor <span aria-hidden="true">↗</span>
+            </button>
+          </div>
+        </div>
+      </section>
+      <section
+        id="history"
+        class="history-section"
+        aria-labelledby="history-title"
+      >
+        <div class="section-heading">
+          <div>
+            <h2 id="history-title">Saved for later.</h2>
+            <p>
+              Your saved drafts, available in this browser for up to 14 days.
+            </p>
+          </div>
+          <div class="history-heading-actions">
+            <span id="history-count" aria-live="polite"></span
+            ><button class="text-button" id="refresh-history" type="button">
+              Refresh</button
+            ><button
+              class="text-button danger"
+              id="clear-history"
+              type="button"
+              disabled
+            >
+              Delete all
+            </button>
+          </div>
+        </div>
+        <form id="history-search-form" class="search-form" role="search">
+          <svg class="icon" aria-hidden="true"><use href="#i-search" /></svg
+          ><label class="visually-hidden" for="history-search"
+            >Search saved text</label
+          ><input
+            type="search"
+            id="history-search"
+            placeholder="Find a word or phrase in your saved text…"
+            autocomplete="off"
+          /><button class="search-submit" type="submit">Search</button>
+        </form>
+        <div id="history-message" class="history-empty" role="status">
+          <span class="history-symbol" aria-hidden="true"
+            ><svg class="icon" aria-hidden="true"><use href="#i-history" /></svg
+          ></span>
+          <div>
+            <h3>No saved analyses yet</h3>
+            <p>
+              Select “Save to my history” before analyzing to keep a copy here.
+            </p>
+          </div>
+        </div>
+        <ul
+          id="history-list"
+          class="history-list"
+          aria-label="Saved analyses"
+          aria-busy="false"
+        ></ul>
+        <nav
+          class="pagination-controls"
+          id="history-pagination"
+          aria-label="History pages"
+          hidden
+        >
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            id="previous-page"
+            type="button"
+          >
+            Previous</button
+          ><span id="page-label" aria-live="polite"></span
+          ><button
+            class="btn btn-outline-secondary btn-sm"
+            id="next-page"
+            type="button"
+          >
+            Next
+          </button>
+        </nav>
+        <p class="privacy-note">
+          Saved text is stored on the server and linked to this browser’s
+          session. Clearing cookies removes access. Delete your saved text here
+          whenever you choose.
+        </p>
+      </section>
+    </main>
+    <footer class="shell site-footer">
+      <a class="footer-brand" href="/" translate="no">Textbench</a
+      ><span>A little more clarity. A little less busywork.</span
+      ><a href="#workspace"
+        >Back to the editor <span aria-hidden="true">↑</span></a
+      >
+    </footer>
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden>
+      <span id="notice-text"></span
+      ><button id="dismiss-notice" type="button" aria-label="Dismiss message">
+        ×
+      </button>
+    </div>
+    <dialog
+      id="confirm-dialog"
+      aria-labelledby="confirm-title"
+      aria-describedby="confirm-description"
+    >
+      <form method="dialog">
+        <div class="dialog-symbol" aria-hidden="true">!</div>
+        <h2 id="confirm-title">Delete saved analysis?</h2>
+        <p id="confirm-description"></p>
+        <div class="dialog-actions">
+          <button class="btn btn-outline-secondary" value="cancel" autofocus>
+            Cancel</button
+          ><button class="btn btn-danger" id="confirm-action" value="confirm">
+            Delete
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <template id="history-item-template"
+      ><li class="history-item">
+        <div class="history-item-content">
+          <p class="history-preview"></p>
+          <span class="history-details"></span>
+        </div>
+        <div class="history-item-actions">
+          <button class="text-button restore-button" type="button">
+            Restore <span aria-hidden="true">↗</span></button
+          ><button class="text-button danger delete-button" type="button">
+            Delete
+          </button>
+        </div>
+      </li></template
+    >
+  </body>
+</html>
