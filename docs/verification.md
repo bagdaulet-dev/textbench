@@ -34,7 +34,7 @@ The original project was never mutated for this experiment.
 
 The script writes desktop and mobile screenshots using only synthetic example
 text. Run it with `npm run test:browser`, or use `BROWSER_CHANNEL=chrome` with an
-existing Chrome installation. CI installs its own Chromium and runs the same test.
+existing Chrome installation. CI runs the same test with Chrome preinstalled on its pinned Ubuntu 24.04 runner.
 
 ## External boundaries
 
