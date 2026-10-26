@@ -18,7 +18,7 @@ jobs:
     name: Python, frontend, and MySQL checks
     runs-on: ubuntu-latest
     env:
-      DJANGO_SECRET_KEY: ci-only-secret-not-for-deployment
+      DJANGO_SECRET_KEY: ci-only-ephemeral-test-secret-never-use-in-production-2026-10-26
       DJANGO_DEBUG: "true"
       MYSQL_DATABASE: textbench
       MYSQL_USER: root
@@ -74,6 +74,8 @@ jobs:
       - name: Check deployment settings
         env:
           DJANGO_DEBUG: "false"
+          DJANGO_SECURE_COOKIES: "true"
+          DJANGO_SSL_REDIRECT: "true"
         run: python backend/manage.py check --deploy --fail-level WARNING
       - name: Build Docker image
         run: docker build -f backend/Dockerfile -t textbench:ci .
